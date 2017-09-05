@@ -2,7 +2,7 @@
 // @name        highlight bitbucket pr
 // @namespace   rooter@kyberian.net
 // @include     https://bitbucket.org/*
-// @version     0.2
+// @version     0.3
 // @require     https://code.jquery.com/jquery-3.2.1.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/arrive/2.4.1/arrive.min.js
@@ -16,6 +16,13 @@ GM_addStyle('.hljs { padding: 0; }');
 
 this.$ = this.jQuery = jQuery.noConflict(true);
 
+const extensionRe = /(?:\.([^.]+))?$/;
+
+function languageAliasFromFilename(filename) {
+    const extension = extensionRe.exec(filename)[1];
+    return extension;
+}
+
 function hlDiff(diffContainer) {
   const brk = '<span class="brkMarker"></span>';
 
@@ -26,6 +33,12 @@ function hlDiff(diffContainer) {
 
   const taggedSourceElement = document.createElement('taggedSource');
   taggedSourceElement.innerHTML = taggedSource;
+
+  const filename = $diffContainer.data('filename');
+  const language = languageAliasFromFilename(filename);
+  if (language) {
+    taggedSourceElement.className = language;
+  }
   hljs.highlightBlock(taggedSourceElement);
   const hlSnippets = taggedSourceElement.innerHTML.split(brk);
   sourceLinesElements.forEach(function (e, i) {
